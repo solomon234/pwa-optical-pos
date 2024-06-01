@@ -7,7 +7,7 @@ const config: NuxtConfig = {
   buildModules: ["@nuxtjs/pwa"],
   pwa: {
     manifest: {
-      name: 'My app\'s name',
+      name: 'OpticalPOS',
       lang: 'en',
       orientation: 'portrait',
       background_color: '#FFFFFF',
