@@ -1,8 +1,34 @@
+
 import type { NuxtConfig } from '@nuxt/types'
 
 const config: NuxtConfig = {
+  extends: '@nuxt/ui-pro',
+  modules: [
+    '@nuxt/eslint',
+    '@nuxt/ui',
+    '@nuxt/fonts',
+    '@vueuse/nuxt'
+  ],
+  ui: {
+    icons: ['heroicons', 'simple-icons'],
+    safelistColors: ['primary', 'red', 'orange', 'green']
+  },
+  colorMode: {
+    disableTransition: true
+  },
   devtools: {
-    enabled: true,
+    enabled: true
+  },
+  typescript: {
+    strict: false
+  },
+  eslint: {
+    config: {
+      stylistic: {
+        commaDangle: 'never',
+        braceStyle: '1tbs'
+      }
+    }
   },
   buildModules: ["@nuxtjs/pwa"],
   pwa: {
