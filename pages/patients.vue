@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { User } from '~/types'
+import type { Patient } from '~/types'
 
 const defaultColumns = [{
   key: 'id',
@@ -21,35 +21,35 @@ const defaultColumns = [{
 }]
 
 const q = ref('')
-const selected = ref<User[]>([])
+const selected = ref<Patient[]>([])
 const selectedColumns = ref(defaultColumns)
 const selectedStatuses = ref([])
 const selectedLocations = ref([])
 const sort = ref({ column: 'id', direction: 'asc' as const })
 const input = ref<{ input: HTMLInputElement }>()
-const isNewUserModalOpen = ref(false)
+const isNewPatientModalOpen = ref(false)
 
 const columns = computed(() => defaultColumns.filter(column => selectedColumns.value.includes(column)))
 
 const query = computed(() => ({ q: q.value, statuses: selectedStatuses.value, locations: selectedLocations.value, sort: sort.value.column, order: sort.value.direction }))
 
-const { data: users, pending } = await useFetch<User[]>('/api/users', { query, default: () => [] })
+const { data: patients, pending } = await useFetch<Patient[]>('/api/patients', { query, default: () => [] })
 
-const defaultLocations = users.value.reduce((acc, user) => {
-  if (!acc.includes(user.location)) {
-    acc.push(user.location)
+const defaultLocations = patients.value.reduce((acc, patient) => {
+  if (!acc.includes(patient.address.city + ' ,' + patient.address.state)) {
+    acc.push(patient.address.city + ' ,' + patient.address.state)
   }
   return acc
 }, [] as string[])
 
-const defaultStatuses = users.value.reduce((acc, user) => {
-  if (!acc.includes(user.status)) {
-    acc.push(user.status)
+const defaultStatuses = patients.value.reduce((acc, patient) => {
+  if (!acc.includes(patient.status)) {
+    acc.push(patient.status)
   }
   return acc
 }, [] as string[])
 
-function onSelect(row: User) {
+function onSelect(row: Patient) {
   const index = selected.value.findIndex(item => item.id === row.id)
   if (index === -1) {
     selected.value.push(row)
@@ -69,8 +69,8 @@ defineShortcuts({
   <UDashboardPage>
     <UDashboardPanel grow>
       <UDashboardNavbar
-        title="Users"
-        :badge="users.length"
+        title="Patients"
+        :badge="patients.length"
       >
         <template #right>
           <UInput
@@ -78,7 +78,7 @@ defineShortcuts({
             v-model="q"
             icon="i-heroicons-funnel"
             autocomplete="off"
-            placeholder="Filter users..."
+            placeholder="Filter patients..."
             class="hidden lg:block"
             @keydown.esc="$event.target.blur()"
           >
@@ -88,10 +88,10 @@ defineShortcuts({
           </UInput>
 
           <UButton
-            label="New user"
+            label="New patient"
             trailing-icon="i-heroicons-plus"
             color="gray"
-            @click="isNewUserModalOpen = true"
+            @click="isNewPatientModalOpen = true"
           />
         </template>
       </UDashboardNavbar>
@@ -131,19 +131,19 @@ defineShortcuts({
       </UDashboardToolbar>
 
       <UDashboardModal
-        v-model="isNewUserModalOpen"
-        title="New user"
-        description="Add a new user to your database"
+        v-model="isNewPatientModalOpen"
+        title="New patient"
+        description="Add a new patient to your database"
         :ui="{ width: 'sm:max-w-md' }"
       >
-        <!-- ~/components/users/UsersForm.vue -->
-        <UsersForm @close="isNewUserModalOpen = false" />
+        <!-- ~/components/patients/PatientsForm.vue -->
+        <PatientsForm @close="isNewPatientModalOpen = false" />
       </UDashboardModal>
 
       <UTable
         v-model="selected"
         v-model:sort="sort"
-        :rows="users"
+        :rows="patients"
         :columns="columns"
         :loading="pending"
         sort-mode="manual"
@@ -163,10 +163,16 @@ defineShortcuts({
           </div>
         </template>
 
+        <template #location-data="{ row }">
+          <div>
+            {{ row.address.city + ' ,' + row.address.state }}
+          </div>
+        </template>
+
         <template #status-data="{ row }">
           <UBadge
             :label="row.status"
-            :color="row.status === 'subscribed' ? 'green' : row.status === 'bounced' ? 'orange' : 'red'"
+            :color="row.status === 'active' ? 'green' : row.status === 'pending' ? 'orange' : 'red'"
             variant="subtle"
             class="capitalize"
           />
